@@ -1,0 +1,13 @@
+{
+  "name": "careertrack",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm.cmd run dev --prefix server\" \"npm.cmd run dev --prefix client\"",
+    "client": "npm.cmd run dev --prefix client",
+    "server": "npm.cmd run dev --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
