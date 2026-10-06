@@ -21,6 +21,8 @@ app.use(express.json());
    MONGODB CONNECTION
 ========================= */
 
+let databaseConnectionPromise = null;
+
 mongoose.connection.on("connected", () => {
   console.log("MongoDB EVENT: connected");
 });
@@ -34,25 +36,62 @@ mongoose.connection.on("error", (error) => {
 });
 
 async function connectDatabase() {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (databaseConnectionPromise) {
+    return databaseConnectionPromise;
+  }
+
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI environment variable is not configured");
+  }
+
+  databaseConnectionPromise = mongoose
+    .connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 10000,
       connectTimeoutMS: 10000,
+    })
+    .then(async () => {
+      console.log("MongoDB connected successfully");
+
+      if (mongoose.connection.db) {
+        await mongoose.connection.db.admin().ping();
+        console.log("MongoDB ping successful");
+      }
+    })
+    .catch((error) => {
+      console.error("MongoDB connection failed:", error.message);
+      databaseConnectionPromise = null;
+      throw error;
     });
 
-    console.log("MongoDB connected successfully");
-
-    // Verify that MongoDB is actually responding
-    await mongoose.connection.db.admin().ping();
-
-    console.log("MongoDB ping successful");
-  } catch (error) {
-    console.error("MongoDB connection failed:");
-    console.error(error.message);
-
-    process.exit(1);
-  }
+  return databaseConnectionPromise;
 }
+
+/*
+ * Vercel can invoke this Express app without a traditional long-running
+ * Node server. The middleware establishes a database connection only
+ * when an API request actually needs it.
+ */
+app.use(async (req, res, next) => {
+  if (req.path === "/api/health") {
+    return next();
+  }
+
+  try {
+    await connectDatabase();
+    next();
+  } catch (error) {
+    console.error("DATABASE MIDDLEWARE ERROR:", error.message);
+
+    res.status(503).json({
+      message: "Database connection unavailable",
+      error: error.message,
+    });
+  }
+});
 
 /* =========================
    AUTHENTICATION
@@ -95,12 +134,23 @@ function authenticateToken(req, res, next) {
    HEALTH
 ========================= */
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "CareerTrack backend is running!",
-    mongoState: mongoose.connection.readyState,
-  });
+app.get("/api/health", async (req, res) => {
+  try {
+    await connectDatabase();
+
+    res.json({
+      success: true,
+      message: "CareerTrack backend is running!",
+      mongoState: mongoose.connection.readyState,
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      message: "CareerTrack backend is running, but MongoDB is unavailable",
+      mongoState: mongoose.connection.readyState,
+      error: error.message,
+    });
+  }
 });
 
 /* =========================
@@ -441,13 +491,24 @@ app.delete(
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
-  await connectDatabase();
+  try {
+    await connectDatabase();
 
-  app.listen(PORT, () => {
-    console.log(
-      `CareerTrack server running on port ${PORT}`
+    app.listen(PORT, () => {
+      console.log(
+        `CareerTrack server running on port ${PORT}`
+      );
+    });
+  } catch (error) {
+    console.error(
+      "CareerTrack local server could not connect to MongoDB:",
+      error.message
     );
-  });
+  }
 }
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
