@@ -1,72 +1,147 @@
-# CareerTrack 🚀
+# CareerTrack
 
-A full-stack job application tracking platform built to help job seekers manage applications, interviews, follow-ups, and career progress.
+A full-stack job application tracker for managing applications, interviews, follow-ups, and career progress. Built with React, Node.js, Express, and MongoDB.
 
-## Features
+## 🚀 Live Demo
+
+**Live application:** https://career-track.vercel.app/
+
+**GitHub:** https://github.com/pranavk3212/CareerTrack
+
+## ✨ Features
 
 ### Authentication
-- User registration
-- Secure login
-- JWT-based authentication
-- Protected user data
+- User registration and login
+- JWT-based authentication with bcrypt password hashing
+- Each user can only access their own data
 
 ### Application Management
-- Add job applications
-- Edit and delete applications
-- Search and filter applications
+- Add, edit, and delete job applications
 - Track application status
+- Search and filter applications
+- CSV export
 
 ### Interview Management
-- Interview scheduling
-- Interviewer details
-- Meeting links
-- Interview notes
+- Schedule interviews
+- Store interviewer details
+- Save meeting links and interview notes
 
 ### Follow-up Tracking
 - Follow-up dates
 - Next actions
 - Upcoming reminders
 
-### Dashboard
-- Application statistics
-- Pipeline overview
-- Recent activity
-- Interview tracking
-
-### Analytics
-- Application status breakdown
-- Progress tracking
-- Conversion insights
+### Dashboard & Analytics
+- Application statistics and pipeline overview
+- Recent activity and interview tracking
+- Status breakdown, progress tracking, and conversion insights
 
 ### User Experience
-- Responsive design
+- Responsive interface
 - Dark mode
-- CSV export
-- Modern dashboard UI
+- Clean job-tracking workflow
 
+## 🛠 Tech Stack
 
-## Tech Stack
+| Layer | Technologies |
+| --- | --- |
+| Frontend | React, Vite, JavaScript, CSS |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Authentication | JWT, bcrypt |
+| Deployment | Vercel |
+| Version Control | Git, GitHub |
 
-### Frontend
-- React
-- Vite
-- CSS
-- JavaScript
+## 🏗 Architecture
 
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
+```text
+React + Vite
+     │
+     │ REST API
+     ▼
+Express.js Backend
+     │
+     │ Mongoose
+     ▼
+MongoDB Atlas
+```
 
-### Authentication
-- JWT
-- bcrypt
+## 📁 Project Structure
 
+```text
+CareerTrack/
+├── client/        # React + Vite frontend
+├── server/        # Express REST API
+└── package.json   # Root scripts
+```
 
-## Installation
+## 💻 Getting Started
 
-Clone the repository:
+### Prerequisites
+
+- Node.js 18 or later
+- MongoDB database, local or MongoDB Atlas
+
+### Clone and install
 
 ```bash
-git clone your-repository-url
+git clone https://github.com/pranavk3212/CareerTrack.git
+cd CareerTrack
+npm install
+npm install --prefix server
+npm install --prefix client
+```
+
+### Environment variables
+
+Create `server/.env`:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/careertrack
+JWT_SECRET=replace-with-a-long-random-string
+```
+
+Never commit real secrets or production credentials.
+
+### Run locally
+
+```bash
+npm run dev
+```
+
+Or separately:
+
+```bash
+npm run server
+npm run client
+```
+
+The Vite frontend runs on port `5173` by default.
+
+## 📸 Screenshots
+
+Add authentic screenshots under `docs/screenshots/`:
+
+```text
+docs/
+└── screenshots/
+    ├── login.png
+    ├── dashboard.png
+    ├── applications.png
+    └── analytics.png
+```
+
+Then embed them with standard Markdown image links.
+
+## 📌 Project Status
+
+CareerTrack is deployed as a working full-stack application. Future improvements may include automated API tests for authentication and application routes.
+
+## 👤 Author
+
+**Pranav K**
+
+- GitHub: https://github.com/pranavk3212
+- LinkedIn: https://linkedin.com/in/pranav-k-2454451ba
+- Portfolio: https://pranavk3212.github.io/Pranav-k-portfolio/
