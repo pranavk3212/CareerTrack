@@ -101,6 +101,7 @@ Create `server/.env`:
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/careertrack
 JWT_SECRET=replace-with-a-long-random-string
+CLIENT_URL=http://localhost:5173
 ```
 
 Never commit real secrets or production credentials.
