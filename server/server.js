@@ -14,7 +14,28 @@ const User = require("./models/User");
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (
+  process.env.CLIENT_URL || "https://career-track.vercel.app"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/career-track-[a-z0-9-]+\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origin not allowed by CORS"));
+    },
+  })
+);
 app.use(express.json());
 
 /* =========================
@@ -88,7 +109,6 @@ app.use(async (req, res, next) => {
 
     res.status(503).json({
       message: "Database connection unavailable",
-      error: error.message,
     });
   }
 });
@@ -96,6 +116,14 @@ app.use(async (req, res, next) => {
 /* =========================
    AUTHENTICATION
 ========================= */
+
+function getJwtSecret() {
+  if (!getJwtSecret()) {
+    throw new Error("JWT_SECRET environment variable is not configured");
+  }
+
+  return getJwtSecret();
+}
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -117,7 +145,7 @@ function authenticateToken(req, res, next) {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET
+      getJwtSecret()
     );
 
     req.user = decoded;
@@ -148,7 +176,6 @@ app.get("/api/health", async (req, res) => {
       success: false,
       message: "CareerTrack backend is running, but MongoDB is unavailable",
       mongoState: mongoose.connection.readyState,
-      error: error.message,
     });
   }
 });
@@ -159,12 +186,6 @@ app.get("/api/health", async (req, res) => {
 
 app.post("/api/auth/register", async (req, res) => {
   try {
-    console.log("REGISTER: request received");
-    console.log(
-      "REGISTER: MongoDB state:",
-      mongoose.connection.readyState
-    );
-
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -188,8 +209,6 @@ app.post("/api/auth/register", async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    console.log("REGISTER: checking existing user");
-
     const existingUser = await User.findOne({
       email: normalizedEmail,
     });
@@ -200,14 +219,10 @@ app.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    console.log("REGISTER: creating password hash");
-
     const hashedPassword = await bcrypt.hash(
       password,
       12
     );
-
-    console.log("REGISTER: creating user");
 
     const user = await User.create({
       name: name.trim(),
@@ -215,15 +230,13 @@ app.post("/api/auth/register", async (req, res) => {
       password: hashedPassword,
     });
 
-    console.log("REGISTER: user created successfully");
-
     const token = jwt.sign(
       {
         id: user._id,
         name: user.name,
         email: user.email,
       },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       {
         expiresIn: "7d",
       }
@@ -243,7 +256,6 @@ app.post("/api/auth/register", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to create account",
-      error: error.message,
     });
   }
 });
@@ -254,12 +266,6 @@ app.post("/api/auth/register", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
-    console.log("LOGIN: request received");
-    console.log(
-      "LOGIN: MongoDB state:",
-      mongoose.connection.readyState
-    );
-
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -276,8 +282,6 @@ app.post("/api/auth/login", async (req, res) => {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-
-    console.log("LOGIN: finding user");
 
     const user = await User.findOne({
       email: normalizedEmail,
@@ -306,7 +310,7 @@ app.post("/api/auth/login", async (req, res) => {
         name: user.name,
         email: user.email,
       },
-      process.env.JWT_SECRET,
+      getJwtSecret(),
       {
         expiresIn: "7d",
       }
@@ -326,7 +330,6 @@ app.post("/api/auth/login", async (req, res) => {
 
     res.status(500).json({
       message: "Failed to login",
-      error: error.message,
     });
   }
 });
@@ -374,14 +377,9 @@ app.get(
   authenticateToken,
   async (req, res) => {
     try {
-      console.log("GET JOBS USER ID:", req.user.id);
-      console.log("DATABASE:", mongoose.connection.name);
-
       const jobs = await Job.find({
         userId: req.user.id,
       }).sort({ createdAt: -1 });
-
-      console.log("GET JOBS RESULT COUNT:", jobs.length);
 
       res.json(jobs);
     } catch (error) {
@@ -389,7 +387,6 @@ app.get(
 
       res.status(500).json({
         message: "Failed to fetch applications",
-        error: error.message,
       });
     }
   }
@@ -411,7 +408,6 @@ app.post(
 
       res.status(400).json({
         message: "Failed to create application",
-        error: error.message,
       });
     }
   }
@@ -447,7 +443,6 @@ app.put(
 
       res.status(400).json({
         message: "Failed to update application",
-        error: error.message,
       });
     }
   }
@@ -478,7 +473,6 @@ app.delete(
 
       res.status(500).json({
         message: "Failed to delete application",
-        error: error.message,
       });
     }
   }
