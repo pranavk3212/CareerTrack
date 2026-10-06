@@ -72,6 +72,7 @@ MongoDB Atlas
 CareerTrack/
 ├── client/        # React + Vite frontend
 ├── server/        # Express REST API
+├── docs/          # Project documentation and screenshots
 └── package.json   # Root scripts
 ```
 
@@ -121,18 +122,21 @@ The Vite frontend runs on port `5173` by default.
 
 ## 📸 Screenshots
 
-Add authentic screenshots under `docs/screenshots/`:
+### Login
 
-```text
-docs/
-└── screenshots/
-    ├── login.png
-    ├── dashboard.png
-    ├── applications.png
-    └── analytics.png
-```
+![CareerTrack Login](docs/screenshots/Login%20Page.png)
 
-Then embed them with standard Markdown image links.
+### Dashboard
+
+![CareerTrack Dashboard](docs/screenshots/Dashboard.png)
+
+### Applications
+
+![CareerTrack Applications](docs/screenshots/Applications.png)
+
+### Analytics
+
+![CareerTrack Analytics](docs/screenshots/Analytics.png)
 
 ## 📌 Project Status
 
