@@ -118,11 +118,11 @@ app.use(async (req, res, next) => {
 ========================= */
 
 function getJwtSecret() {
-  if (!getJwtSecret()) {
+  if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET environment variable is not configured");
   }
 
-  return getJwtSecret();
+  return process.env.JWT_SECRET;
 }
 
 function authenticateToken(req, res, next) {
