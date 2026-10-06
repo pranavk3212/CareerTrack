@@ -140,7 +140,7 @@ The Vite frontend runs on port `5173` by default.
 
 ## 📌 Project Status
 
-CareerTrack is deployed as a working full-stack application. Future improvements may include automated API tests for authentication and application routes.
+CareerTrack is deployed as a working full-stack application. The repository is structured for local development and Vercel deployment, with environment-based configuration for production services.
 
 ## 👤 Author
 
